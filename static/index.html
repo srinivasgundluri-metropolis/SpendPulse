@@ -1,0 +1,712 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>spendPulse</title>
+    <link rel="icon" type="image/svg+xml" href="/static/favicon.svg" />
+    <link rel="apple-touch-icon" href="/static/ledger-icon.svg" />
+    <meta name="theme-color" content="#0a1424" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600;700&family=Manrope:wght@400;500;650;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="/static/styles.css?v=eyebrow2" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  </head>
+  <body>
+    <div class="shell">
+      <header class="topbar">
+        <div class="topbar-brand">
+          <img class="brand-mark sm" src="/static/ledger-icon.svg" width="36" height="36" alt="spendPulse" />
+          <div>
+            <div class="eyebrow">where the money went</div>
+            <h1 class="brand compact">spend<span>Pulse</span></h1>
+          </div>
+        </div>
+        <div class="topbar-controls">
+          <div class="filters" id="filterBar">
+            <div>
+              <label class="muted" for="issuerSelect">Cards</label>
+              <select id="issuerSelect" class="select">
+                <option value="all">All cards (clubbed)</option>
+              </select>
+            </div>
+            <div>
+              <label class="muted" for="statementSelect">Period</label>
+              <select id="statementSelect" class="select"></select>
+            </div>
+            <div>
+              <label class="muted" for="memberSelect">Member</label>
+              <select id="memberSelect" class="select">
+                <option value="all">All members</option>
+              </select>
+            </div>
+            <div>
+              <label class="muted" for="tagSelect">Tag</label>
+              <select id="tagSelect" class="select">
+                <option value="all">All tags</option>
+              </select>
+            </div>
+          </div>
+          <button class="btn btn-primary" id="heroUploadBtn" type="button">Upload</button>
+        </div>
+      </header>
+
+      <section class="upload-drawer" id="uploadDrawer">
+        <div class="upload-panel compact">
+          <div>
+            <h2>Add statements</h2>
+            <p>Pick the card issuer, then drop a <strong>PDF</strong> (Amex) or an activity <strong>CSV / Excel</strong> export. Spreadsheet rows are split into months automatically. Same issuer + closing month replaces the prior upload.</p>
+          </div>
+          <div>
+            <label class="muted" for="uploadIssuerSelect">Issuer</label>
+            <select id="uploadIssuerSelect" class="select" style="min-width: 200px">
+              <option value="amex">American Express</option>
+            </select>
+          </div>
+          <div class="dropzone" id="dropzone">
+            <strong>Drag & drop PDF, CSV, or Excel</strong>
+            <span>or click Browse</span>
+          </div>
+          <div class="upload-actions">
+            <button class="btn btn-ghost" id="browseBtn" type="button">Browse</button>
+            <button class="btn btn-ghost" id="closeUploadBtn" type="button">Close</button>
+            <div class="status" id="uploadStatus"></div>
+          </div>
+          <input id="fileInput" type="file" accept=".pdf,.csv,.xlsx,.xls,.xlsm,application/pdf,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel" />
+        </div>
+      </section>
+
+      <section id="emptyState" class="empty hidden">
+        <h2>No statements yet</h2>
+        <p>Upload your latest statement PDF to unlock coffee, avoidable spend, and month-over-month progress.</p>
+        <button class="btn btn-primary" type="button" id="emptyUploadBtn">Upload statement</button>
+      </section>
+
+      <main id="dashboard" class="hidden">
+        <p class="insight" id="insightText"></p>
+
+        <section class="metrics">
+          <article class="metric-card">
+            <h3>Net spend</h3>
+            <div class="metric" id="metricSpend">$0</div>
+            <div class="sub" id="subSpend"></div>
+            <div id="deltaSpend"></div>
+          </article>
+          <article class="metric-card">
+            <h3>Coffee</h3>
+            <div class="metric" id="metricCoffee">$0</div>
+            <div class="sub" id="subCoffee"></div>
+            <div id="deltaCoffee"></div>
+          </article>
+          <article class="metric-card">
+            <h3>Avoidable</h3>
+            <div class="metric" id="metricAvoidable">$0</div>
+            <div class="sub" id="subAvoidable"></div>
+            <div id="deltaAvoidable"></div>
+          </article>
+          <article class="metric-card">
+            <h3>Refunds</h3>
+            <div class="metric" id="metricRefunds">$0</div>
+            <div class="sub" id="subRefunds"></div>
+            <div id="deltaRefunds"></div>
+          </article>
+          <article class="metric-card">
+            <h3>Gross</h3>
+            <div class="metric" id="metricNet">$0</div>
+            <div class="sub" id="subNet"></div>
+            <div id="deltaNet"></div>
+          </article>
+          <article class="metric-card">
+            <h3>Necessary</h3>
+            <div class="metric" id="metricNecessary">$0</div>
+            <div class="sub" id="subNecessary"></div>
+          </article>
+          <article class="metric-card">
+            <h3>Company</h3>
+            <div class="metric" id="metricCompany">$0</div>
+            <div class="sub" id="subCompany"></div>
+            <div id="deltaCompany"></div>
+          </article>
+        </section>
+
+        <nav class="tabs" role="tablist" aria-label="Dashboard sections">
+          <button type="button" class="tab active" data-tab="overview" role="tab" aria-selected="true">Overview</button>
+          <button type="button" class="tab" data-tab="members" role="tab" aria-selected="false">Members</button>
+          <button type="button" class="tab" data-tab="activity" role="tab" aria-selected="false">Activity</button>
+          <button type="button" class="tab" data-tab="dining" role="tab" aria-selected="false">Dining</button>
+          <button type="button" class="tab" data-tab="transport" role="tab" aria-selected="false">Transport</button>
+          <button type="button" class="tab" data-tab="tesla" role="tab" aria-selected="false">Tesla</button>
+          <button type="button" class="tab" data-tab="transfers" role="tab" aria-selected="false">Transfers</button>
+        </nav>
+
+        <!-- OVERVIEW — all charts on one page -->
+        <section class="tab-panel active" id="panel-overview" role="tabpanel">
+          <div class="panel-grid">
+            <article class="card">
+              <div class="panel-title">
+                <h3 id="ovCategoryTitle">Spend by category</h3>
+                <span class="muted" id="ovCategorySub">Personal</span>
+              </div>
+              <div class="chart-wrap"><canvas id="categoryChart"></canvas></div>
+            </article>
+            <article class="card">
+              <div class="panel-title">
+                <h3 id="ovDailyTitle">Daily spend</h3>
+                <span class="muted" id="ovDailySub">Charges</span>
+              </div>
+              <div class="chart-wrap"><canvas id="dailyChart"></canvas></div>
+            </article>
+            <article class="card">
+              <div class="panel-title">
+                <h3 id="ovAvoidTitle">Avoidable leak</h3>
+                <span class="muted" id="ovAvoidSub">By category</span>
+              </div>
+              <div class="chart-wrap short"><canvas id="avoidableChart"></canvas></div>
+            </article>
+            <article class="card" id="coffee-section">
+              <div class="panel-title">
+                <h3 id="ovCoffeeTitle">Coffee by shop</h3>
+                <span class="muted" id="ovCoffeeSub">Habit meter</span>
+              </div>
+              <div class="chart-wrap short"><canvas id="coffeeChart"></canvas></div>
+            </article>
+          </div>
+        </section>
+
+        <!-- MEMBERS -->
+        <section class="tab-panel" id="panel-members" role="tabpanel" hidden>
+          <nav class="subtabs" data-parent="members" role="tablist" aria-label="Member views">
+            <button type="button" class="subtab active" data-subtab="mb-share">Share</button>
+            <button type="button" class="subtab" data-subtab="mb-breakdown">Breakdown</button>
+            <button type="button" class="subtab" data-subtab="mb-leaders">Leaders</button>
+            <button type="button" class="subtab" data-subtab="mb-mom">MoM</button>
+            <button type="button" class="subtab" data-subtab="mb-statements">By statement</button>
+          </nav>
+
+          <div class="subtab-panel active" id="sub-mb-share">
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Spend by member</h3>
+                <span class="muted">Share of personal charges</span>
+              </div>
+              <div class="chart-wrap roomy"><canvas id="cardholderChart"></canvas></div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-mb-breakdown" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Card member breakdown</h3>
+                <span class="muted">Coffee · avoidable · total</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Member</th>
+                      <th class="num">Charges</th>
+                      <th class="num">Coffee</th>
+                      <th class="num">Avoidable</th>
+                      <th class="num">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cardholderBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-mb-leaders" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Who spent more</h3>
+                <span class="muted">Leaders this statement</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Category</th>
+                      <th>Leader</th>
+                      <th class="num">Amount</th>
+                      <th>Runner-up</th>
+                      <th class="num">Margin</th>
+                    </tr>
+                  </thead>
+                  <tbody id="leadersBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-mb-mom" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Member progress (MoM)</h3>
+                <span class="muted" id="memberMomLabel">vs prior</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Member</th>
+                      <th class="num">Spend</th>
+                      <th class="num">Coffee</th>
+                      <th class="num">Avoidable</th>
+                      <th>MoM</th>
+                    </tr>
+                  </thead>
+                  <tbody id="memberMomBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-mb-statements" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>By statement</h3>
+                <span class="muted">Spend month · statement closes early next month</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Period</th>
+                      <th class="num">Net</th>
+                      <th class="num">Coffee</th>
+                      <th class="num">Avoidable</th>
+                      <th class="num">Company</th>
+                      <th class="num">Gross</th>
+                    </tr>
+                  </thead>
+                  <tbody id="ytdMonthBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- ACTIVITY -->
+        <section class="tab-panel" id="panel-activity" role="tabpanel" hidden>
+          <nav class="subtabs" data-parent="activity" role="tablist" aria-label="Activity views">
+            <button type="button" class="subtab active" data-subtab="ac-coffee">Coffee</button>
+            <button type="button" class="subtab" data-subtab="ac-avoidable">Avoidable</button>
+            <button type="button" class="subtab" data-subtab="ac-refunds">Refunds</button>
+            <button type="button" class="subtab" data-subtab="ac-washed">Washed</button>
+            <button type="button" class="subtab" data-subtab="ac-all">All charges</button>
+            <button type="button" class="subtab" data-subtab="ac-merchants">Merchants</button>
+          </nav>
+
+          <div class="subtab-panel active" id="sub-ac-coffee">
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Coffee transactions</h3>
+                <span class="tag">Cut first</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Member</th>
+                      <th>Merchant</th>
+                      <th>Category</th>
+                      <th class="num">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody id="coffeeBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-ac-avoidable" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Top avoidable</h3>
+                <span class="muted">By amount</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Member</th>
+                      <th>Merchant</th>
+                      <th>Tags</th>
+                      <th class="num">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody id="avoidableBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-ac-refunds" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Refunds & credits</h3>
+                <span class="tag mint">Money back</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Member</th>
+                      <th>Description</th>
+                      <th>Type</th>
+                      <th class="num">Credit</th>
+                    </tr>
+                  </thead>
+                  <tbody id="refundBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-ac-washed" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Washed charges</h3>
+                <span class="muted">Exact refund pairs</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Member</th>
+                      <th>Charge / refund</th>
+                      <th class="num">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody id="washedBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-ac-all" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>All charges</h3>
+                <span class="muted">Personal + company</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Member</th>
+                      <th>Merchant</th>
+                      <th>Tags</th>
+                      <th class="num">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody id="allSpendBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-ac-merchants" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Top merchants</h3>
+                <span class="muted">By member</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Member</th>
+                      <th>Merchant</th>
+                      <th>Category</th>
+                      <th class="num">Count</th>
+                      <th class="num">Total</th>
+                    </tr>
+                  </thead>
+                  <tbody id="merchantBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- DINING -->
+        <section class="tab-panel" id="panel-dining" role="tabpanel" hidden>
+          <nav class="subtabs" data-parent="dining" role="tablist" aria-label="Dining views">
+            <button type="button" class="subtab active" data-subtab="dn-cuisines">Cuisines</button>
+            <button type="button" class="subtab" data-subtab="dn-restaurants">Restaurants</button>
+            <button type="button" class="subtab" data-subtab="dn-all">All charges</button>
+          </nav>
+
+          <div class="subtab-panel active" id="sub-dn-cuisines">
+            <div class="panel-grid">
+              <article class="card">
+                <div class="panel-title">
+                  <h3>By cuisine</h3>
+                  <span class="muted" id="diningCuisineSummary">Dining Out</span>
+                </div>
+                <div class="chart-wrap roomy"><canvas id="diningCuisineChart"></canvas></div>
+              </article>
+              <article class="card">
+                <div class="panel-title">
+                  <h3>Cuisine breakdown</h3>
+                  <span class="muted">Spend · visits · places</span>
+                </div>
+                <div class="table-scroll roomy">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Cuisine</th>
+                        <th class="num">Places</th>
+                        <th class="num">Visits</th>
+                        <th class="num">Spend</th>
+                      </tr>
+                    </thead>
+                    <tbody id="diningCuisineBody"></tbody>
+                  </table>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="subtab-panel" id="sub-dn-restaurants" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Distinct restaurants</h3>
+                <span class="muted" id="diningRestaurantSummary">Normalized from statement descriptions</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Restaurant</th>
+                      <th>Cuisine</th>
+                      <th class="num">Visits</th>
+                      <th class="num">Spend</th>
+                      <th>Last</th>
+                    </tr>
+                  </thead>
+                  <tbody id="diningRestaurantBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-dn-all" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Dining charges</h3>
+                <span class="muted" id="diningAllSummary">Dining Out only</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Member</th>
+                      <th>Restaurant</th>
+                      <th>Cuisine</th>
+                      <th class="num">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody id="diningAllBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- TRANSPORT -->
+        <section class="tab-panel" id="panel-transport" role="tabpanel" hidden>
+          <article class="card solo">
+            <div class="panel-title">
+              <h3>Transport</h3>
+              <span class="muted" id="transportSummary">Uber · Lyft · Ventra · parking</span>
+            </div>
+            <div class="table-scroll roomy">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Member</th>
+                    <th>Merchant</th>
+                    <th>Tags</th>
+                    <th class="num">Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="transportBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+
+        <!-- TESLA -->
+        <section class="tab-panel" id="panel-tesla" role="tabpanel" hidden>
+          <nav class="subtabs" data-parent="tesla" role="tablist" aria-label="Tesla views">
+            <button type="button" class="subtab active" data-subtab="ts-all">All</button>
+            <button type="button" class="subtab" data-subtab="ts-ev">EV charging</button>
+            <button type="button" class="subtab" data-subtab="ts-ins">Insurance</button>
+            <button type="button" class="subtab" data-subtab="ts-fsd">FSD</button>
+            <button type="button" class="subtab" data-subtab="ts-mom">MoM</button>
+          </nav>
+
+          <div class="subtab-panel active" id="sub-ts-all">
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Tesla &amp; EV</h3>
+                <span class="muted" id="teslaSummary">All related charges</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Member</th>
+                      <th>Description</th>
+                      <th>Tags</th>
+                      <th class="num">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody id="teslaBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-ts-ev" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>EV charging</h3>
+                <span class="muted" id="evChargingSummary">Supercharger · ChargePoint · Jolt</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Member</th>
+                      <th>Description</th>
+                      <th>Tags</th>
+                      <th class="num">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody id="evChargingBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-ts-ins" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Tesla insurance</h3>
+                <span class="muted" id="teslaInsSummary">Tesla Insurance Company</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Member</th>
+                      <th>Description</th>
+                      <th>Tags</th>
+                      <th class="num">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody id="teslaInsBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-ts-fsd" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Tesla FSD</h3>
+                <span class="muted" id="teslaFsdSummary">Subscription / FSD</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Date</th>
+                      <th>Member</th>
+                      <th>Description</th>
+                      <th>Tags</th>
+                      <th class="num">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody id="teslaFsdBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+
+          <div class="subtab-panel" id="sub-ts-mom" hidden>
+            <article class="card solo">
+              <div class="panel-title">
+                <h3>Tesla MoM</h3>
+                <span class="muted">By spend month</span>
+              </div>
+              <div class="table-scroll roomy">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Period</th>
+                      <th class="num">EV charging</th>
+                      <th class="num">Insurance</th>
+                      <th class="num">FSD</th>
+                      <th class="num">Other</th>
+                      <th class="num">Total</th>
+                      <th>MoM</th>
+                    </tr>
+                  </thead>
+                  <tbody id="teslaMomBody"></tbody>
+                </table>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <!-- TRANSFERS (excluded from spend analytics) -->
+        <section class="tab-panel" id="panel-transfers" role="tabpanel" hidden>
+          <article class="card solo">
+            <div class="panel-title">
+              <h3>Transfers</h3>
+              <span class="muted" id="transferSummary">Excluded from spend analytics</span>
+            </div>
+            <div class="table-scroll roomy">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Date</th>
+                    <th>Member</th>
+                    <th>Description</th>
+                    <th>Type</th>
+                    <th class="num">Amount</th>
+                  </tr>
+                </thead>
+                <tbody id="transferBody"></tbody>
+              </table>
+            </div>
+          </article>
+        </section>
+      </main>
+
+      <footer>
+        Local only · PDFs under <code>data/uploads</code>
+      </footer>
+    </div>
+    <script src="/static/app.js?v=activity1"></script>
+  </body>
+</html>

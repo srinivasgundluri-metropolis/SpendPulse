@@ -1,0 +1,38 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="American Express Platinum">
+  <defs>
+    <linearGradient id="card" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#1a2a48"/>
+      <stop offset="45%" stop-color="#0c1730"/>
+      <stop offset="100%" stop-color="#06101f"/>
+    </linearGradient>
+    <linearGradient id="chrome" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="45%" stop-color="#d7e0ec"/>
+      <stop offset="100%" stop-color="#9eacbf"/>
+    </linearGradient>
+    <linearGradient id="sheen" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff" stop-opacity="0"/>
+      <stop offset="45%" stop-color="#ffffff" stop-opacity="0.22"/>
+      <stop offset="100%" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="blue" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#006fcf"/>
+      <stop offset="100%" stop-color="#004b8d"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Card body -->
+  <rect x="10" y="22" width="108" height="84" rx="12" fill="url(#card)" stroke="url(#chrome)" stroke-width="2.5"/>
+  <rect x="10" y="22" width="108" height="84" rx="12" fill="url(#sheen)"/>
+
+  <!-- Amex blue badge -->
+  <rect x="22" y="36" width="44" height="28" rx="4" fill="url(#blue)"/>
+  <text x="44" y="55" text-anchor="middle" font-family="Helvetica Neue, Helvetica, Arial, sans-serif" font-size="11" font-weight="800" letter-spacing="0.5" fill="#ffffff">AMEX</text>
+
+  <!-- Chip -->
+  <rect x="78" y="40" width="22" height="16" rx="3" fill="url(#chrome)" opacity="0.9"/>
+  <path d="M82 44h14M82 48h14M82 52h14" stroke="#0c1730" stroke-width="1" opacity="0.35"/>
+
+  <!-- Platinum word -->
+  <text x="24" y="84" font-family="Georgia, Times New Roman, serif" font-size="13" font-weight="600" letter-spacing="2.5" fill="url(#chrome)">PLATINUM</text>
+</svg>

@@ -1,0 +1,28 @@
+# Byte-compiled / cache
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+.venv/
+venv/
+env/
+
+# Local spend data (never commit real statements)
+data/statements.json
+data/uploads/
+data/household.json
+logs/
+*.pdf
+*.xlsx
+*.xls
+!data/household.example.json
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Generated LaunchAgent (install script writes into ~/Library)
+launch-agent/com.spendpulse.app.plist
+launch-agent/com.sgundluri.platinum-ledger.plist
