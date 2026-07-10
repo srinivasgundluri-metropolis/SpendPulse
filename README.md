@@ -1,17 +1,68 @@
 # spendPulse
 
-Local-first credit card spend tracker. Upload statement **PDFs** (Amex today) or activity **CSV / Excel** exports (Apple Card, Citi, Chase, …). Transactions are categorized, tagged, and rolled into month-over-month views — coffee, dining, Tesla, transfers, and the rest.
+Most spend trackers stop at “how much did I spend?”  
+**spendPulse** answers the questions that actually change behavior:
 
-Nothing leaves your machine. `data/` stays local and is gitignored.
+- How much **coffee** this month — and what’s the annualized pace?
+- What’s **avoidable** vs necessary?
+- Which **tags** cut across categories (Starbucks, Tesla, Transfers, Company…)?
+- Where did **dining** go — by cuisine and distinct restaurants?
+- How do **card members** compare month over month?
 
-## Features
+Local-first. Multi-issuer. Your PDFs and CSV/Excel exports never leave the machine.
 
-- **Multi-issuer shell** — filter by card or club all cards into one YTD
-- **PDF + CSV/Excel import** — spreadsheets split into calendar months automatically
-- **Categories & tags** — coffee, avoidable, Tesla, Starbucks, Transfers, …
-- **Dining** — cuisine + distinct restaurant rollups
-- **Members** — cardholder share, leaders, MoM
-- **LaunchAgent** (macOS) — keeps the local server running
+## Why this isn’t another generic tracker
+
+| Generic tracker | spendPulse |
+|-----------------|------------|
+| One “Food & Drink” bucket | **Coffee** as a first-class metric + visit count + annualized run-rate |
+| Flat categories only | **Tags** on every charge — filter the whole dashboard by Starbucks, Tesla, Avoidable, Company… |
+| “Discretionary” hand-waving | Explicit **avoidable** rules (dining, sweets, shopping, entertainment, subscriptions, coffee…) |
+| Merchant list dump | **Dining** tab: cuisines + distinct restaurants from noisy Amex/Apple strings |
+| Single card export | **Cards** filter: one issuer or **all cards clubbed** into one YTD |
+| Cloud sync | 100% local — `data/` stays on disk |
+
+## Screenshots
+
+### Overview — coffee & avoidable up front
+
+![Overview with coffee and avoidable metrics](docs/screenshots/01-overview.png)
+
+Net, refunds, **coffee**, **avoidable**, necessary, and company — with MoM when you have prior statements.
+
+### Activity — coffee visits with tags
+
+![Coffee activity table with tags](docs/screenshots/02-activity-coffee.png)
+
+Every coffee charge keeps its category **and** meta tags (`Coffee`, `Starbucks`, `Avoidable`, …).
+
+### Avoidable spend — tagged line by line
+
+![Avoidable spend with tag chips](docs/screenshots/03-activity-avoidable.png)
+
+Not a vague pie slice — a filterable list of what you can actually cut.
+
+### Dining — cuisines & distinct restaurants
+
+![Dining cuisines breakdown](docs/screenshots/04-dining.png)
+
+Noisy statement text collapsed into places you’ve actually been, rolled up by cuisine.
+
+### Tag filter — slice the whole ledger
+
+![Dashboard filtered by Starbucks tag](docs/screenshots/05-tag-starbucks.png)
+
+Pick **Starbucks**, **Tesla**, **Transfers**, or any category tag — Overview, Activity, and YTD all follow.
+
+## Features (full set)
+
+- **Multi-issuer shell** — Amex PDF today; Apple Card / Citi / Chase / Cap One via CSV·Excel activity exports (auto-split by calendar month)
+- **Tags & filters** — Member + Tag + Cards + Period
+- **Coffee / avoidable / company** metrics and charts
+- **Dining** — cuisine + restaurant rollups
+- **Transport · Tesla · Transfers** dedicated tabs
+- **Members** — share, leaders, MoM
+- **macOS LaunchAgent** — keeps the local server up
 
 ## Quick start
 
@@ -31,7 +82,6 @@ Open [http://127.0.0.1:8787](http://127.0.0.1:8787).
 
 ```bash
 ./scripts/install-launch-agent.sh
-# restart
 launchctl kickstart -k "gui/$(id -u)/com.spendpulse.app"
 ```
 
@@ -39,7 +89,7 @@ launchctl kickstart -k "gui/$(id -u)/com.spendpulse.app"
 
 ```bash
 cp data/household.example.json data/household.json
-# edit cardholder name / store numbers
+# edit cardholder / store numbers
 ```
 
 ## Upload tips
@@ -57,7 +107,7 @@ Pick the issuer, then drop the file. Same issuer + closing month replaces the pr
 
 - Statements live in `data/statements.json` and `data/uploads/`
 - No accounts, no cloud sync, no analytics beacons
-- Do **not** commit real statement files
+- Do **not** commit real statement files (gitignored)
 
 ## License
 
