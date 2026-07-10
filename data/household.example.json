@@ -1,4 +1,8 @@
 {
+  "members": [
+    {"last_name": "smith", "canonical": "J SMITH"},
+    {"last_name": "jones", "canonical": "Household Member"}
+  ],
   "reattribute_cardholder": "Household Member",
   "reattribute_card_ending": "",
   "starbucks_store_numbers": ["51694", "5723"],

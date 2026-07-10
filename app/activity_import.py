@@ -17,7 +17,7 @@ import pandas as pd
 
 from .categorize import build_tags, categorize
 from .parser import Statement, Transaction, _fingerprint
-from .reattribute import JEEVITHA, JEEVITHA_CARD, is_jeevitha_starbucks
+from .reattribute import JEEVITHA, JEEVITHA_CARD, is_jeevitha_starbucks, resolve_cardholder
 
 # Canonical field → accepted header aliases (case-insensitive, stripped)
 _COLUMN_ALIASES: dict[str, tuple[str, ...]] = {
@@ -276,9 +276,10 @@ def load_activity_frame(path: Path) -> pd.DataFrame:
         if amount is None or amount == 0:
             continue
 
-        cardholder = (
-            _clean_desc(row.get(mapped["cardholder"])) if "cardholder" in mapped else ""
-        ) or "Primary"
+        cardholder = resolve_cardholder(
+            (_clean_desc(row.get(mapped["cardholder"])) if "cardholder" in mapped else "")
+            or "Primary"
+        )
         account = row.get(mapped["account"]) if "account" in mapped else ""
         reference = _clean_desc(row.get(mapped["reference"])) if "reference" in mapped else ""
 

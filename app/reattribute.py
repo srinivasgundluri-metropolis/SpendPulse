@@ -81,6 +81,26 @@ def __getattr__(name: str):
     raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
 
 
+def resolve_cardholder(name: str) -> str:
+    """Normalize any name variant to the household canonical form by last name.
+
+    Extracts the last word of `name`, lowercases it, and looks it up in the
+    `members` list in household.json.  If matched, returns the canonical display
+    name; otherwise returns `name` unchanged.
+    """
+    if not name or name.strip() in {"", "Primary"}:
+        return name
+    cfg = _load_config()
+    members = cfg.get("members") or []
+    if not members:
+        return name
+    last = name.strip().split()[-1].lower()
+    for member in members:
+        if last == (member.get("last_name") or "").strip().lower():
+            return member["canonical"]
+    return name
+
+
 def reattribute_transaction(tx: dict) -> dict:
     """Return a copy with cardholder fixed when household Starbucks rules apply."""
     name, card = _target_member()

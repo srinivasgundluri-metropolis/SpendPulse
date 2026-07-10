@@ -19,6 +19,12 @@ function shortDate(iso) {
   return d.toLocaleDateString("en-US", { month: "short", day: "numeric" });
 }
 
+const _ISSUER_LABELS = { amex: "Amex", apple: "Apple Card", citi: "Citi", chase: "Chase", capital_one: "Capital One", discover: "Discover", other: "Other" };
+function issuerTag(key) {
+  if (!key) return "";
+  return _ISSUER_LABELS[key] || key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase());
+}
+
 /** e.g. "Amex · Jun 2026 · Jun 5–Jul 7 · closed Jul 7" */
 function periodDisplay(s, { showIssuer = false } = {}) {
   const issuer =
@@ -439,7 +445,7 @@ function renderStatementTable(rows) {
     ? rows
         .map(
           (m) => `<tr>
-              <td>${escapeHtml(m.period_label)}<div class="muted">${
+              <td>${escapeHtml(m.period_label)}${m.issuer ? `<span class="tag" style="margin-left:6px;font-size:0.72em;vertical-align:middle">${escapeHtml(issuerTag(m.issuer))}</span>` : ""}<div class="muted">${
                 m.period_start && m.period_end
                   ? `${escapeHtml(shortDate(m.period_start))}–${escapeHtml(shortDate(m.period_end))} · `
                   : ""
@@ -699,7 +705,7 @@ function renderMemberMomTable(rows, prevLabel) {
         `Avoid ${momChip(m.avoidable)}`,
       ].join(" ");
       return `<tr>
-        <td>${escapeHtml(r.cardholder)}${r.card_ending ? `<div class="muted">···${escapeHtml(String(r.card_ending).slice(-5))}</div>` : ""}</td>
+        <td>${escapeHtml(r.cardholder)}${state.issuer && state.issuer !== "all" && r.card_ending ? `<div class="muted">···${escapeHtml(String(r.card_ending).slice(-5))}</div>` : ""}</td>
         <td class="num">${money(m.spend.current)}<div class="muted">was ${money(m.spend.previous)}</div></td>
         <td class="num">${money(m.coffee.current)}<div class="muted">${m.coffee_count.current} visits · was ${money(m.coffee.previous)}</div></td>
         <td class="num">${money(m.avoidable.current)}<div class="muted">was ${money(m.avoidable.previous)}</div></td>
@@ -880,7 +886,7 @@ function renderCardholderTable(rows) {
   body.innerHTML = rows
     .map(
       (h) => `<tr>
-        <td><button type="button" class="btn btn-ghost member-link" data-member="${escapeHtml(h.cardholder)}" style="padding:6px 10px">${escapeHtml(h.cardholder)}</button>${h.card_ending ? `<div class="muted">···${escapeHtml(String(h.card_ending).slice(-5))}</div>` : ""}${h.reattributed_count ? `<div class="muted">+${h.reattributed_count} UIC Starbucks (${money(h.reattributed_amount)})</div>` : ""}</td>
+        <td><button type="button" class="btn btn-ghost member-link" data-member="${escapeHtml(h.cardholder)}" style="padding:6px 10px">${escapeHtml(h.cardholder)}</button>${state.issuer && state.issuer !== "all" && h.card_ending ? `<div class="muted">···${escapeHtml(String(h.card_ending).slice(-5))}</div>` : ""}${h.reattributed_count ? `<div class="muted">+${h.reattributed_count} UIC Starbucks (${money(h.reattributed_amount)})</div>` : ""}</td>
         <td class="num">${h.count}</td>
         <td class="num">${money(h.coffee)}<div class="muted">${h.coffee_count} visits</div></td>
         <td class="num">${money(h.avoidable)}</td>

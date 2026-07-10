@@ -11,7 +11,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from .activity_import import parse_activity_file
-from .analytics import compare_statements, summarize_statement, ytd_summary
+from .analytics import compare_statements, member_leaders_combined, summarize_statement, ytd_summary
 from .parsers import (
     DEFAULT_ISSUER,
     ISSUERS,
@@ -168,6 +168,21 @@ def dashboard(
     member = cardholder if cardholder and cardholder.lower() != "all" else None
     tag_f = tag if tag and tag.lower() != "all" else None
     comparison = compare_statements(current, previous, cardholder=member, tag=tag_f)
+
+    # In All Cards view the "current" statement is one issuer only (newest overall).
+    # Recompute leaders using the most recent statement from each issuer so the
+    # comparison spans all household cards, not just one.
+    if not issuer_f and current:
+        seen_issuers: set[str] = set()
+        multi_issuer: list[dict] = []
+        for s in all_statements:  # sorted newest-first
+            iss = (s.get("issuer") or "amex").lower()
+            if iss not in seen_issuers:
+                seen_issuers.add(iss)
+                multi_issuer.append(s)
+        if len(multi_issuer) > 1:
+            comparison["member_leaders"] = member_leaders_combined(multi_issuer)
+
     ytd = ytd_summary(statements, cardholder=member, tag=tag_f)
     return {
         "has_data": True,

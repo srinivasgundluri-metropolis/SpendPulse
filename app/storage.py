@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 from .categorize import build_tags, categorize
-from .reattribute import reattribute_statement
+from .reattribute import reattribute_statement, resolve_cardholder
 
 DATA_DIR = Path(__file__).resolve().parent.parent / "data"
 UPLOADS_DIR = DATA_DIR / "uploads"
@@ -30,6 +30,7 @@ def _normalize_statement(statement: dict) -> dict:
     txs = []
     for t in statement.get("transactions") or []:
         row = dict(t)
+        row["cardholder"] = resolve_cardholder(row.get("cardholder") or "")
         cats = categorize(row.get("description") or "", float(row.get("amount") or 0))
         row["category"] = cats["category"]
         row["avoidable"] = cats["avoidable"]

@@ -683,6 +683,14 @@ def member_leaders(statement: dict) -> list[dict[str, Any]]:
     return leaders
 
 
+def member_leaders_combined(statements: list[dict]) -> list[dict[str, Any]]:
+    """Compute member leaders across multiple statements (e.g. all issuers for same period)."""
+    all_txs = [t for s in statements for t in (s.get("transactions") or [])]
+    if not all_txs:
+        return []
+    return member_leaders({"transactions": all_txs, "id": "", "period_label": ""})
+
+
 def member_mom_progress(current: dict, previous: dict | None) -> list[dict[str, Any]]:
     """Per-card-member MoM progress on spend / coffee / avoidable."""
     cur_map = {r["cardholder"]: r for r in summarize_statement(current)["by_cardholder"]}
@@ -940,6 +948,7 @@ def ytd_summary(
                 "period_start": s.get("period_start"),
                 "period_end": s.get("period_end"),
                 "statement_id": s["id"],
+                "issuer": s.get("issuer") or "amex",
                 "spend": t["spend"],
                 "net_spend": t["net_spend"],
                 "coffee": t["coffee"],
