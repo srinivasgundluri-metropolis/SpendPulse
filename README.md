@@ -11,6 +11,12 @@ Most spend trackers stop at “how much did I spend?”
 
 Local-first. Multi-issuer. Your PDFs and CSV/Excel exports never leave the machine.
 
+<p align="center">
+  <img src="https://raw.githubusercontent.com/srinivasgundluri-metropolis/SpendPulse/main/docs/screenshots/01-overview.png" alt="spendPulse overview — coffee and avoidable metrics" width="900" />
+</p>
+
+<p align="center"><em>Demo screenshots — names and totals masked.</em></p>
+
 ## Why this isn’t another generic tracker
 
 | Generic tracker | spendPulse |
@@ -26,31 +32,31 @@ Local-first. Multi-issuer. Your PDFs and CSV/Excel exports never leave the machi
 
 ### Overview — coffee & avoidable up front
 
-![Overview with coffee and avoidable metrics](docs/screenshots/01-overview.png)
+<img src="https://raw.githubusercontent.com/srinivasgundluri-metropolis/SpendPulse/main/docs/screenshots/01-overview.png" alt="Overview with coffee and avoidable metrics" width="900" />
 
 Net, refunds, **coffee**, **avoidable**, necessary, and company — with MoM when you have prior statements.
 
 ### Activity — coffee visits with tags
 
-![Coffee activity table with tags](docs/screenshots/02-activity-coffee.png)
+<img src="https://raw.githubusercontent.com/srinivasgundluri-metropolis/SpendPulse/main/docs/screenshots/02-activity-coffee.png" alt="Coffee activity table with tags" width="900" />
 
 Every coffee charge keeps its category **and** meta tags (`Coffee`, `Starbucks`, `Avoidable`, …).
 
 ### Avoidable spend — tagged line by line
 
-![Avoidable spend with tag chips](docs/screenshots/03-activity-avoidable.png)
+<img src="https://raw.githubusercontent.com/srinivasgundluri-metropolis/SpendPulse/main/docs/screenshots/03-activity-avoidable.png" alt="Avoidable spend with tag chips" width="900" />
 
 Not a vague pie slice — a filterable list of what you can actually cut.
 
 ### Dining — cuisines & distinct restaurants
 
-![Dining cuisines breakdown](docs/screenshots/04-dining.png)
+<img src="https://raw.githubusercontent.com/srinivasgundluri-metropolis/SpendPulse/main/docs/screenshots/04-dining.png" alt="Dining cuisines breakdown" width="900" />
 
 Noisy statement text collapsed into places you’ve actually been, rolled up by cuisine.
 
 ### Tag filter — slice the whole ledger
 
-![Dashboard filtered by Starbucks tag](docs/screenshots/05-tag-starbucks.png)
+<img src="https://raw.githubusercontent.com/srinivasgundluri-metropolis/SpendPulse/main/docs/screenshots/05-tag-starbucks.png" alt="Dashboard filtered by Starbucks tag" width="900" />
 
 Pick **Starbucks**, **Tesla**, **Transfers**, or any category tag — Overview, Activity, and YTD all follow.
 
