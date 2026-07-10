@@ -16,7 +16,7 @@ Nothing leaves your machine. `data/` stays local and is gitignored.
 ## Quick start
 
 ```bash
-git clone https://github.com/<you>/SpendPulse.git
+git clone https://github.com/srinivasgundluri-metropolis/SpendPulse.git
 cd SpendPulse
 python3 -m venv .venv
 source .venv/bin/activate
